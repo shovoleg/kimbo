@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create account — kimbo{% endblock %}
+
+{% block body %}
+<div class="card shadow-sm auth-card">
+    <div class="card-body p-4">
+        <h1 class="h4 mb-1">Create account</h1>
+        <p class="text-secondary small mb-4">
+            Registration is instant. A confirmation link will be emailed to you.
+        </p>
+
+        <form method="post" novalidate>
+            <input type="hidden" name="_token" value="{{ csrf_token('register') }}">
+
+            <div class="mb-3">
+                <label for="inputName" class="form-label">Name</label>
+                <input type="text" name="name" id="inputName" class="form-control"
+                       value="{{ old_name|default('') }}" required autofocus autocomplete="name">
+            </div>
+
+            <div class="mb-3">
+                <label for="inputEmail" class="form-label">Email</label>
+                <input type="email" name="email" id="inputEmail" class="form-control"
+                       value="{{ old_email|default('') }}" required autocomplete="email">
+            </div>
+
+            <div class="mb-3">
+                <label for="inputPassword" class="form-label">Password</label>
+                <input type="password" name="password" id="inputPassword" class="form-control"
+                       required autocomplete="new-password">
+                <div class="form-text">Any non-empty password is accepted.</div>
+            </div>
+
+            <button class="btn btn-primary w-100" type="submit">Create account</button>
+        </form>
+
+        <hr class="my-4">
+        <p class="text-center mb-0 small">
+            Already registered? <a href="{{ path('app_login') }}">Sign in</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

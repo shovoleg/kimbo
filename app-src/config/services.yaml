@@ -1,0 +1,17 @@
+parameters:
+    app.base_url: '%env(default:app_base_url_default:APP_BASE_URL)%'
+    app.mail_from: '%env(default:app_mail_from_default:MAILER_FROM)%'
+
+    app_base_url_default: 'https://kimbo.odotibmebel.synology.me'
+    app_mail_from_default: 'no-reply@kimbo.local'
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/Entity/'
+            - '../src/Kernel.php'

@@ -1,0 +1,103 @@
+services:
+
+  db:
+    image: postgres:16-alpine
+    container_name: kimbo-db
+    restart: unless-stopped
+    command:
+      - postgres
+      - -c
+      - shared_buffers=512MB
+      - -c
+      - effective_cache_size=2GB
+      - -c
+      - maintenance_work_mem=128MB
+      - -c
+      - work_mem=16MB
+      - -c
+      - max_connections=50
+      - -c
+      - random_page_cost=1.1
+      - -c
+      - effective_io_concurrency=200
+    environment:
+      POSTGRES_DB: kimbo
+      POSTGRES_USER: kimbo
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+      LANG: C.UTF-8
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kimbo -d kimbo"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [kimbonet]
+
+  php:
+    build:
+      context: ./docker/php
+    container_name: kimbo-php
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: 0
+      APP_SECRET: ${APP_SECRET:?set APP_SECRET in .env}
+      DATABASE_URL: "postgresql://kimbo:${DB_PASSWORD}@db:5432/kimbo?serverVersion=16&charset=utf8"
+      MESSENGER_TRANSPORT_DSN: "doctrine://default?auto_setup=0"
+      MAILER_DSN: ${MAILER_DSN:-null://null}
+      MAILER_FROM: ${MAILER_FROM:-no-reply@kimbo.local}
+      APP_BASE_URL: ${APP_BASE_URL:-http://192.168.1.155:8086}
+      DEFAULT_URI: ${APP_BASE_URL:-http://192.168.1.155:8086}
+    volumes:
+      - ./app:/var/www/html
+    networks: [kimbonet]
+
+  worker:
+    build:
+      context: ./docker/php
+    container_name: kimbo-worker
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: 0
+      APP_SECRET: ${APP_SECRET}
+      DATABASE_URL: "postgresql://kimbo:${DB_PASSWORD}@db:5432/kimbo?serverVersion=16&charset=utf8"
+      MESSENGER_TRANSPORT_DSN: "doctrine://default?auto_setup=0"
+      MAILER_DSN: ${MAILER_DSN:-null://null}
+      MAILER_FROM: ${MAILER_FROM:-no-reply@kimbo.local}
+      APP_BASE_URL: ${APP_BASE_URL:-http://192.168.1.155:8086}
+      DEFAULT_URI: ${APP_BASE_URL:-http://192.168.1.155:8086}
+    volumes:
+      - ./app:/var/www/html
+    command:
+      - sh
+      - -c
+      - >-
+        sleep 20;
+        while true;
+        do php bin/console messenger:consume async --time-limit=21600 --memory-limit=128M --quiet
+        || { echo "worker: messenger not ready, waiting 30s"; sleep 30; }; done
+    networks: [kimbonet]
+
+  web:
+    image: nginx:1.27-alpine
+    container_name: kimbo-web
+    restart: unless-stopped
+    depends_on: [php]
+    ports:
+      - "8086:80"
+    volumes:
+      - ./app:/var/www/html:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks: [kimbonet]
+
+networks:
+  kimbonet:
+    driver: bridge

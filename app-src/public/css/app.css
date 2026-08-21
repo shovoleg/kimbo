@@ -1,0 +1,58 @@
+.brand-k {
+    color: #fd7e14;
+    font-weight: 700;
+}
+
+.row-blocked .user-name,
+.row-blocked td {
+    color: #8a8f98;
+}
+
+.row-blocked .user-name {
+    text-decoration: line-through;
+}
+
+.th-sort {
+    color: inherit;
+    text-decoration: none;
+}
+
+.th-sort:hover {
+    text-decoration: underline;
+}
+
+#usersTable th,
+#usersTable td {
+    text-align: left;
+    vertical-align: middle;
+}
+
+#usersTable .form-check-input {
+    width: 1.1rem;
+    height: 1.1rem;
+    cursor: pointer;
+}
+
+.auth-card {
+    max-width: 420px;
+    margin: 3rem auto;
+}
+
+.card-header .btn {
+    min-width: 2.25rem;
+}
+
+.btn:disabled {
+    cursor: not-allowed;
+}
+
+@media (max-width: 575.98px) {
+    #usersTable {
+        font-size: 0.9rem;
+    }
+
+    .card-header .btn {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+}

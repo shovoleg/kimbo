@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Sign in — kimbo{% endblock %}
+
+{% block body %}
+<div class="card shadow-sm auth-card">
+    <div class="card-body p-4">
+        <h1 class="h4 mb-1">Sign in</h1>
+        <p class="text-secondary small mb-4">Access the user management panel.</p>
+
+        {% if error %}
+            <div class="alert alert-danger" role="alert">
+                {{ error.messageKey|trans(error.messageData, 'security') }}
+            </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+            <div class="mb-3">
+                <label for="inputEmail" class="form-label">Email</label>
+                <input type="email" name="email" id="inputEmail" class="form-control"
+                       value="{{ last_email }}" required autofocus autocomplete="email">
+            </div>
+
+            <div class="mb-3">
+                <label for="inputPassword" class="form-label">Password</label>
+                <input type="password" name="password" id="inputPassword" class="form-control"
+                       required autocomplete="current-password">
+            </div>
+
+            <button class="btn btn-primary w-100" type="submit">Sign in</button>
+        </form>
+
+        <hr class="my-4">
+        <p class="text-center mb-0 small">
+            No account? <a href="{{ path('app_register') }}">Create one</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
